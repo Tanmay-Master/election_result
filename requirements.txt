@@ -1,6 +1,6 @@
 streamlit
 pandas
-plotly>=6.1.1
+plotly
 numpy
 fpdf2
-kaleido>=0.2.1
+playwright

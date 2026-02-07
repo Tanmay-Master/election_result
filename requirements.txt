@@ -3,4 +3,4 @@ pandas
 plotly
 numpy
 fpdf2
-playwright
+kaleido==0.2.1.post1

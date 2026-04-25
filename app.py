@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import numpy as np
 from fpdf import FPDF
 import tempfile
@@ -146,6 +147,254 @@ with tab3:
                             text=strike_rate_df['Rate'].apply(lambda x: f'{x:.1f}%'),
                             color_discrete_map=PARTY_COLORS, title="Efficiency: Wins vs Contested")
         st.plotly_chart(fig_strike, use_container_width=True)
+    
+    # --- ENHANCED SUNBURST ANALYSIS ---
+    st.header("🌅 Enhanced Sunburst Analysis - Election Performance")
+    
+    # Advanced filtering options
+    col_filter1, col_filter2, col_filter3 = st.columns(3)
+    
+    with col_filter1:
+        available_elections = sorted(df['Election_type'].unique())
+        selected_election = st.selectbox("Select Election Type:", available_elections, index=0)
+    
+    with col_filter2:
+        available_rounds = sorted(df['Round'].unique())
+        selected_rounds = st.multiselect("Select Rounds:", available_rounds, default=available_rounds)
+    
+    with col_filter3:
+        available_parties = sorted(df['Party'].dropna().unique())
+        selected_parties = st.multiselect("Filter by Parties:", available_parties, default=available_parties)
+    
+    # Apply filters
+    filtered_df = df[
+        (df['Election_type'] == selected_election) & 
+        (df['Round'].isin(selected_rounds)) &
+        (df['Party'].isin(selected_parties))
+    ].copy()
+    
+    # Special handling for Nagar Sevak elections - Party-wise side-by-side comparison
+    if selected_election in ['Nagarsevak A', 'Nagarsevak B'] and not filtered_df.empty:
+        st.header(f"🏛️ {selected_election} - Party-wise Side-by-Side Analysis")
+        
+        # Remove rows with zero or null votes
+        filtered_df = filtered_df[filtered_df['Votes'] > 0]
+        
+        # Get unique parties for side-by-side comparison
+        parties_in_data = sorted(filtered_df['Party'].unique())
+        
+        # Create columns for each party
+        party_cols = st.columns(len(parties_in_data))
+        
+        for idx, party in enumerate(parties_in_data):
+            with party_cols[idx]:
+                st.subheader(f"{party}")
+                
+                # Filter data for this specific party
+                party_data = filtered_df[filtered_df['Party'] == party]
+                
+                if not party_data.empty:
+                    # Create sunburst for this party
+                    party_sunburst_data = party_data.groupby(['Name', 'Prabhag'])['Votes'].sum().reset_index()
+                    
+                    fig_party = px.sunburst(
+                        party_sunburst_data,
+                        path=['Name', 'Prabhag'],
+                        values='Votes',
+                        color_discrete_sequence=[PARTY_COLORS.get(party, 'gray')],
+                        title=f"{party} Candidates"
+                    )
+                    
+                    fig_party.update_traces(
+                        textinfo="label+value",
+                        hovertemplate='<b>%{label}</b><br>Votes: %{value:,}<br>% of Parent: %{percentParent}<extra></extra>'
+                    )
+                    
+                    fig_party.update_layout(height=400, font_size=10)
+                    st.plotly_chart(fig_party, use_container_width=True)
+                    
+                    # Party summary metrics
+                    total_party_votes = party_data['Votes'].sum()
+                    party_candidates = party_data['Name'].nunique()
+                    st.metric(f"{party} Total Votes", f"{total_party_votes:,}")
+                    st.metric(f"{party} Candidates", party_candidates)
+                else:
+                    st.info(f"No data for {party}")
+        
+        st.markdown("---")  # Separator line
+    
+    if not filtered_df.empty:
+        # Remove rows with zero or null votes for cleaner visualization
+        filtered_df = filtered_df[filtered_df['Votes'] > 0]
+        
+        # Create multiple sunburst views
+        tab_sun1, tab_sun2, tab_sun3 = st.tabs(["🎯 Candidate → Prabhag", "🏛️ Prabhag → Candidate", "🔄 Round → Party → Prabhag"])
+        
+        with tab_sun1:
+            st.subheader(f"{selected_election}: Candidate → Prabhag Analysis")
+            
+            # Aggregate data for sunburst but keep party info for coloring
+            sunburst_data1 = filtered_df.groupby(['Name', 'Party', 'Prabhag'])['Votes'].sum().reset_index()
+            
+            fig_sun1 = px.sunburst(
+                sunburst_data1,
+                path=['Name', 'Prabhag'],
+                values='Votes',
+                color='Party',
+                color_discrete_map=PARTY_COLORS,
+                title=f"{selected_election} - Vote Distribution by Candidate → Prabhag"
+            )
+            
+            fig_sun1.update_traces(
+                textinfo="label+value",
+                hovertemplate='<b>%{label}</b><br>Votes: %{value:,}<br>% of Parent: %{percentParent}<br>% of Total: %{percentRoot}<extra></extra>'
+            )
+            
+            fig_sun1.update_layout(height=650, font_size=11)
+            st.plotly_chart(fig_sun1, use_container_width=True)
+        
+        with tab_sun2:
+            st.subheader(f"{selected_election}: Prabhag → Candidate Analysis")
+            
+            # Different hierarchy for geographic analysis (keeping party info for coloring only)
+            sunburst_data2 = filtered_df.groupby(['Prabhag', 'Name', 'Party'])['Votes'].sum().reset_index()
+            
+            fig_sun2 = px.sunburst(
+                sunburst_data2,
+                path=['Prabhag', 'Name'],
+                values='Votes',
+                color='Party',
+                color_discrete_map=PARTY_COLORS,
+                title=f"{selected_election} - Geographic Distribution by Prabhag → Candidate"
+            )
+            
+            fig_sun2.update_traces(
+                textinfo="label+value",
+                hovertemplate='<b>%{label}</b><br>Votes: %{value:,}<br>% of Parent: %{percentParent}<br>% of Total: %{percentRoot}<extra></extra>'
+            )
+            
+            fig_sun2.update_layout(height=650, font_size=11)
+            st.plotly_chart(fig_sun2, use_container_width=True)
+        
+        with tab_sun3:
+            if len(selected_rounds) > 1:
+                st.subheader(f"{selected_election}: Round → Party → Prabhag Analysis")
+                
+                # Round-wise analysis
+                sunburst_data3 = filtered_df.groupby(['Round', 'Party', 'Prabhag'])['Votes'].sum().reset_index()
+                sunburst_data3['Round'] = 'Round ' + sunburst_data3['Round'].astype(str)
+                
+                fig_sun3 = px.sunburst(
+                    sunburst_data3,
+                    path=['Round', 'Party', 'Prabhag'],
+                    values='Votes',
+                    color='Party',
+                    color_discrete_map=PARTY_COLORS,
+                    title=f"{selected_election} - Round-wise Performance by Round → Party → Prabhag"
+                )
+                
+                fig_sun3.update_traces(
+                    textinfo="label+percent parent+value",
+                    hovertemplate='<b>%{label}</b><br>Votes: %{value:,}<br>% of Parent: %{percentParent}<br>% of Total: %{percentRoot}<extra></extra>'
+                )
+                
+                fig_sun3.update_layout(height=650, font_size=11)
+                st.plotly_chart(fig_sun3, use_container_width=True)
+            else:
+                st.info("Select multiple rounds to see round-wise comparison")
+        
+        # Enhanced Analytics Section
+        st.header("📊 Detailed Performance Analytics")
+        
+        col_analytics1, col_analytics2 = st.columns(2)
+        
+        with col_analytics1:
+            st.subheader("🏆 Top Performers by Prabhag")
+            
+            # Top performer in each prabhag
+            top_performers = filtered_df.groupby(['Prabhag', 'Name', 'Party'])['Votes'].sum().reset_index()
+            top_by_prabhag = top_performers.loc[top_performers.groupby('Prabhag')['Votes'].idxmax()]
+            top_by_prabhag = top_by_prabhag.sort_values('Votes', ascending=False)
+            
+            st.dataframe(
+                top_by_prabhag[['Prabhag', 'Name', 'Party', 'Votes']].rename(columns={
+                    'Prabhag': 'Ward', 'Name': 'Winner', 'Party': 'Party', 'Votes': 'Votes'
+                }),
+                use_container_width=True
+            )
+        
+        with col_analytics2:
+            st.subheader("📈 Vote Share Analysis")
+            
+            # Party-wise vote share
+            party_totals = filtered_df.groupby('Party')['Votes'].sum().reset_index()
+            party_totals['Vote_Share'] = (party_totals['Votes'] / party_totals['Votes'].sum() * 100).round(2)
+            party_totals = party_totals.sort_values('Votes', ascending=False)
+            
+            fig_vote_share = px.pie(
+                party_totals, 
+                values='Votes', 
+                names='Party',
+                title=f"{selected_election} - Party Vote Share",
+                color='Party',
+                color_discrete_map=PARTY_COLORS,
+                hole=0.4
+            )
+            
+            fig_vote_share.update_traces(
+                textposition='inside',
+                textinfo='percent+label',
+                hovertemplate='<b>%{label}</b><br>Votes: %{value:,}<br>Share: %{percent}<extra></extra>'
+            )
+            
+            st.plotly_chart(fig_vote_share, use_container_width=True)
+        
+        # Performance Metrics Dashboard
+        st.header("🎯 Key Performance Indicators")
+        
+        metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+        
+        with metric_col1:
+            total_votes = filtered_df['Votes'].sum()
+            st.metric("Total Votes Cast", f"{total_votes:,}")
+        
+        with metric_col2:
+            unique_candidates = filtered_df['Name'].nunique()
+            st.metric("Total Candidates", unique_candidates)
+        
+        with metric_col3:
+            unique_prabhags = filtered_df['Prabhag'].nunique()
+            st.metric("Prabhags Covered", unique_prabhags)
+        
+        with metric_col4:
+            avg_votes_per_prabhag = (total_votes / unique_prabhags) if unique_prabhags > 0 else 0
+            st.metric("Avg Votes/Prabhag", f"{avg_votes_per_prabhag:,.0f}")
+        
+        # Detailed Comparison Table
+        st.subheader("📋 Comprehensive Results Table")
+        
+        # Create enhanced pivot table
+        detailed_pivot = filtered_df.groupby(['Name', 'Party', 'Prabhag'])['Votes'].sum().reset_index()
+        comparison_table = detailed_pivot.pivot_table(
+            index=['Name', 'Party'], 
+            columns='Prabhag', 
+            values='Votes', 
+            fill_value=0
+        )
+        
+        # Add summary statistics
+        comparison_table['Total_Votes'] = comparison_table.sum(axis=1)
+        comparison_table['Avg_Per_Prabhag'] = comparison_table['Total_Votes'] / unique_prabhags
+        comparison_table['Max_Prabhag_Votes'] = comparison_table.iloc[:, :-2].max(axis=1)
+        comparison_table['Min_Prabhag_Votes'] = comparison_table.iloc[:, :-3].min(axis=1)
+        
+        # Sort by total votes
+        comparison_table = comparison_table.sort_values('Total_Votes', ascending=False)
+        
+        st.dataframe(comparison_table, use_container_width=True)
+        
+    else:
+        st.warning(f"No data found for the selected filters: {selected_election} with selected parties and rounds.")
 
 # --- TAB 4: DATA TABLES ---
 with tab4:

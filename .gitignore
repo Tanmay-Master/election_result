@@ -1,0 +1,297 @@
+# Election Result Analysis - .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# Streamlit
+.streamlit/
+
+# Data Files (Sensitive)
+# Uncomment if you want to exclude actual election data
+# *.csv
+# election_data/
+# results/
+
+# Generated Reports
+reports/
+*.pdf
+generated_reports/
+
+# Temporary Files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# Log Files
+logs/
+*.log
+
+# Cache Files
+.cache/
+cache/
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+desktop.ini
+
+# Linux
+*~
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# Editor Files
+*.swp
+*.swo
+*~
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Image Files (Generated)
+charts/
+images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Excel Files (if generated)
+*.xlsx
+*.xls
+
+# Compressed Files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Configuration Files (if containing sensitive data)
+config.ini
+settings.json
+secrets.json
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Node.js (if using any JS tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package Files
+*.deb
+*.rpm
+*.msi
+*.dmg
+
+# Test Files
+test_data/
+sample_data/
+mock_data/
+
+# Documentation Build
+docs/build/
+site/
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Virtual Environment Directories
+venv*/
+env*/
+ENV*/
+
+# IDE Files
+.idea/
+.vscode/
+*.sublime-*
+*.atom/
+
+# Profiling Data
+*.prof
+
+# Coverage Reports
+htmlcov/
+.coverage
+coverage.xml
+
+# Pytest
+.pytest_cache/
+
+# Tox
+.tox/
+
+# MyPy
+.mypy_cache/
+
+# Local Development
+local/
+dev/
+development/
+
+# Deployment
+deploy/
+deployment/
+
+# Secrets and Keys
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+keys/
+
+# Application Specific
+# Add any project-specific files to ignore here
+election_results_backup/
+old_versions/
+archive/

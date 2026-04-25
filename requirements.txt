@@ -1,6 +1,7 @@
-streamlit
-pandas
-plotly
-numpy
-fpdf2
-kaleido==0.2.1.post1
+streamlit>=1.28.0
+pandas>=1.5.0
+plotly>=5.15.0
+numpy>=1.24.0
+fpdf2>=2.7.0  # Fixed from fpdf
+kaleido>=0.2.1
+pillow>=9.0.0  # Add for image processing

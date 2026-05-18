@@ -12,7 +12,7 @@ import os
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Election Intelligence 2025", layout="wide")
 
-st.title("🗳️ Election Intelligence & Margin Analysis Dashboard")
+st.title("🗳️  Election Intelligence & Margin Analysis Dashboard ")
 
 @st.cache_data
 def load_data():
@@ -56,7 +56,7 @@ class PDF_Report(FPDF):
 # -----------------------------------------------------------------------------
 # 3. Sidebar Configuration
 # -----------------------------------------------------------------------------
-st.sidebar.header("📁 PDF Export Filters")
+st.sidebar.header(" PDF Export Filters")
 def natural_sort_key(s): return int(s) if s.isdigit() else s
 
 unique_prabhags = sorted(df['Prabhag'].unique(), key=natural_sort_key)
